@@ -1,0 +1,3 @@
+[submodule "bluez-rfcomm"]
+	path = bluez-rfcomm
+	url = https://aur.archlinux.org/bluez-rfcomm.git

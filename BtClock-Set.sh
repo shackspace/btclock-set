@@ -7,6 +7,9 @@
 #	stty
 
 BTCLOCK_NAME="BT Clock"
+RFCOMM=rfcomm
+
+which $RFCOMM 2> /dev/null || RFCOMM="$( dirname "$0" )/rfcomm"
 
 get_btclock_string_from_date() {
 	if [ $# -lt 1 ]
@@ -117,7 +120,7 @@ main() {
 	fi
 	
 	# bind /dev/rfcomm0 to bt device
-	rfcomm bind rfcomm0 "$mac"
+	$RFCOMM bind rfcomm0 "$mac"
 	
 	# apply serial settings
 	stty -F /dev/rfcomm0 9600
@@ -127,7 +130,7 @@ main() {
 	# read and print output for at most 3 seconds
 	cat /dev/rfcomm0 & sleep 3; kill $!
 	
-	rfcomm release rfcomm0
+	$RFCOMM release rfcomm0
 }
 
 main-usage() {
