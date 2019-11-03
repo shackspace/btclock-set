@@ -6,4 +6,4 @@ Simple shell script to set the btClock to the current system time.
 The pin parameter is only needed if the clock is not paired yet.
 
 ## Dependencies
-You need to have following tools installed: *bluez, rfcomm, stty*
+You need to have following tools installed: *bluez, bt-agent, rfcomm, stty*
