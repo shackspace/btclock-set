@@ -40,7 +40,7 @@ get_btclock_mac() {
 	then
 		# try to discover btclock
 		echo "bluetooth clock is not paired. Scanning for device \"$devicename\"..." 1>&2
-		( echo scan on; sleep 30; scan off ) | bluetoothctl
+		( echo scan on; sleep 30; echo scan off ) | bluetoothctl > /dev/null
 		local mac=$( bluetoothctl devices | grep "$devicename" | sed "s/Device \([^ ]*\) $devicename/\1/" )
 	fi
 
