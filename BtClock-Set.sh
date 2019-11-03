@@ -89,7 +89,7 @@ then
 	exit 1
 fi
 
-# bind /dev/rfcomm0to bt device
+# bind /dev/rfcomm0 to bt device
 rfcomm bind rfcomm0 "$mac"
 
 # apply serial settings
@@ -100,5 +100,4 @@ get_btclock_string_from_date > /dev/rfcomm0
 # read and print output for at most 3 seconds
 cat /dev/rfcomm0 & sleep 3; kill $!
 
-# release /dev/rfcomm0
 rfcomm release rfcomm0
