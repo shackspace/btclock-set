@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 # dependencies:
-#	  bluez
-#	  rfcomm
-#	  stty
+#	bluez
+#	rfcomm
+#	bt-agent
+#	stty
 
 get_btclock_string_from_date() {
 	if [ $# -lt 1 ]
@@ -39,7 +40,6 @@ get_btclock_mac() {
 	if [ "$mac" == "" ]
 	then
 		# try to discover btclock
-		echo "bluetooth clock is not paired. Scanning for device \"$devicename\"..." 1>&2
 		( echo scan on; sleep 30; echo scan off ) | bluetoothctl > /dev/null
 		local mac=$( bluetoothctl devices | grep "$devicename" | sed "s/Device \([^ ]*\) $devicename/\1/" )
 	fi
@@ -61,17 +61,28 @@ is_btclock_paired() {
 
 pair_with_btclock() {
 	local mac="$1"
+	local pin="$2"
 
-	if [ $# -lt 1 ]
+	if [ $# -lt 2 ]
 	then
-		echo "usage: pair_with_btclock <mac>" 1>&2
+		echo "usage: pair_with_btclock <mac> <pin>" 1>&2
 		return
 	fi
+	
+	local returncode=0
 
-	bluetoothctl pair $mac
+	echo "$mac $pin" > tmp_bluetooth_pins.txt
+	bt-agent -c NoInputNoOutput -p tmp_bluetooth_pins.txt &
+	bluetoothctl pair $mac || returncode=1
+	kill $!
+	rm tmp_bluetooth_pins.txt
+
+	return $returncode
 }
 
 BTCLOCK_NAME="BT Clock"
+
+pin="$1"
 
 echo -n "determining MAC of device \"BT Clock\"... " 1>&2
 mac=$( get_btclock_mac "${BTCLOCK_NAME}" )
@@ -83,10 +94,19 @@ then
 	exit 1
 fi
 
-if ! is_btclock_paired "$mac" && ! pair_with_btclock "$mac"
+if ! is_btclock_paired "$mac"
 then
-	echo "failed to pair with device \"${BTCLOCK_NAME}\" ($mac)" 1>&2
-	exit 1
+	if [ $# -lt 1 ]
+	then
+		echo "usage: $0 [pin]" 1>&2
+		exit 1
+	fi
+
+	if ! pair_with_btclock "$mac" "$pin"
+	then
+		echo "failed to pair with device \"${BTCLOCK_NAME}\" ($mac)" 1>&2
+		exit 1
+	fi
 fi
 
 # bind /dev/rfcomm0 to bt device
