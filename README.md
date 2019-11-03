@@ -2,6 +2,7 @@
 Simple shell script to set the btClock to the current system time.
 
 **Usage**: ```sudo ./BtClock-Set.sh [pin]```
+
 The pin parameter is only needed if the clock is not paired yet.
 
 ## Dependencies
